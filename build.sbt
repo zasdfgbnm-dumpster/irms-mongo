@@ -3,8 +3,6 @@ import sbt.complete.DefaultParsers._
 import java.io.File
 
 scalaVersion := "2.12.1"
-scalacOptions ++= Seq("-Xlint","-feature","-deprecation")
-//crossScalaVersions := Seq(scalaversion)
 name := "DoMongoOperations"
 version := "0.0.1-SNAPSHOT"
 libraryDependencies += "org.mongodb.scala" %% "mongo-scala-driver" % "1.2.1"
