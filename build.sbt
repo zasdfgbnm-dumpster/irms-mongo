@@ -14,5 +14,7 @@ assemblyMergeStrategy in assembly := {
 	case PathList("org","mongodb", xs @ _*) => MergeStrategy.deduplicate
 	case PathList("org","bson", xs @ _*) => MergeStrategy.deduplicate
 	case PathList("com","mongodb", xs @ _*) => MergeStrategy.deduplicate
+	case PathList("rx", xs @ _*) => MergeStrategy.deduplicate
+	case PathList("rxScala", xs @ _*) => MergeStrategy.deduplicate
 	case x => MergeStrategy.discard
 }

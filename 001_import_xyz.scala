@@ -23,7 +23,7 @@ package irms {
 		val elements = pt.split(" ")
 		val tol = 1e-5
 
-		val max_queries:Int = 2048
+		val max_queries:Int = 100
 		val batch_size:Int = 1000 // 1 batch contain 1000 elements
 		val max_batches_per_file:Int = 100 // 1 file contain 100 batches
 
@@ -67,10 +67,10 @@ package irms {
 			val readyToExit = new Semaphore(0)
 			val allowedFiles = new Semaphore(max_batches_per_file)
 			val allowedBatches = new Semaphore(max_queries)
-			val streamFiles = Observable.from( 30 to 39/*658*/ ).flatMap(
+			val streamFiles = Observable.from( 30 to 9658 ).flatMap(
 				j => Observable.from(Future {
 					allowedFiles.acquire(max_batches_per_file)
-					println("file:"+j)
+					println("file: "+j)
 					"/mnt/data/gaoxiang/raw/xyz/univ-%05d".format(j)
 				}
 			));
@@ -91,10 +91,7 @@ package irms {
 			val streamBulkWrite = streamUpdates.flatMap(w=>collection.bulkWrite(w, BulkWriteOptions().ordered(false)))
 			streamBulkWrite.subscribe(
 				// onNext
-				j => {
-					println(j)
-					allowedBatches.release()
-				},
+				j => allowedBatches.release() ,
 				// onError
 				(j:Throwable) => {
 					println(j.getMessage)
