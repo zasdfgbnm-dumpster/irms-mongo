@@ -53,22 +53,6 @@ package irms {
 			( conv._1, UpdateOneModel(Document("_id" -> smiles), set("3d_struct", conv._2)) )
 		}
 
-		//def wait_results[C](observable:Observable[C]): Seq[C] = Await.result(observable.toFuture(), Duration.Inf)
-
-		def ____main(args: Array[String]): Unit = {
-			val fn = args(0) //30-end
-
-
-
-			// val writes = Source.fromFile(fn).getLines.toList
-			// val op =
-
-
-
-			//wait_results(op)
-
-		}
-
 		def lines2updates(l:Seq[String]):List[UpdateOneModel[Nothing]] = {
 			l.par.map(_.trim).par.filter(_.length>0).par.map(str2update).filter(!_._1).map(_._2).toList
 		}
@@ -109,7 +93,7 @@ package irms {
 				// onNext
 				j => {
 					println(j)
-					// allowedBatches.release()
+					allowedBatches.release()
 				},
 				// onError
 				(j:Throwable) => {
@@ -119,9 +103,10 @@ package irms {
 				// onCompleted
 				() => readyToExit.release()
 			)
-			readyToExit.acquire()
+
 
 			// clean up
+			readyToExit.acquire()
 			mongoClient.close()
 		}
 	}
