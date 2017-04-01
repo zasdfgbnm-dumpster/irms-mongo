@@ -6,6 +6,7 @@ scalaVersion := "2.12.1"
 name := "DoMongoOperations"
 version := "0.0.1-SNAPSHOT"
 libraryDependencies += "org.mongodb.scala" %% "mongo-scala-driver" % "1.2.1"
+libraryDependencies += "io.reactivex" %% "rxscala" % "0.26.5"
 mainClass in assembly := Some("irms.ImportXYZ")
 assemblyMergeStrategy in assembly := {
 	case "FunctionalGroups.txt" => MergeStrategy.deduplicate
