@@ -27,6 +27,11 @@ package irms {
 		val batch_size:Int = 1000 // 1 batch contain 1000 elements
 		val max_batches_per_file:Int = 100 // 1 file contain 100 batches
 
+		// db commons
+		val mongoClient: MongoClient = MongoClient()
+		val database: MongoDatabase = mongoClient.getDatabase("irms")
+		val collection: MongoCollection[Document] = database.getCollection("universe")
+
 		// convert strings like "23;6,2.7715,0.006,0.351;6,1.9331,-1.1897,0.1199;6,0.7004,-0.7605,-0.0479;6,-0.5601,-1.5308,-0.3146;8,-1.3413,-1.4834,0.8926;6,-1.7422,-0.2751,1.4754;6,-1.5296,0.9971,1.119;6,-0.7287,1.3521,-0.114;6,-1.3883,0.6465,-1.2833;8,-0.5908,0.0376,-2.2552;6,-1.3106,-0.7519,-1.3638;6,0.6091,0.6917,0.0513;6,1.8225,1.1218,0.2834;1,3.3032,-0.0689,1.3188;1,3.5028,0.1291,-0.5007;1,2.2614,-2.2373,0.0912;1,-0.3807,-2.557,-0.6179;1,-2.3406,-0.3713,2.3924;1,-1.9293,1.7857,1.7105;1,-0.6423,2.4286,-0.2426;1,-2.3145,1.1755,-1.6411;1,-2.1391,-1.3407,-1.8266;1,2.034,2.1949,0.4021;"
 		// to document like:
 		// 	{
@@ -57,17 +62,17 @@ package irms {
 			l.par.map(_.trim).par.filter(_.length>0).par.map(str2update).filter(!_._1).map(_._2).toList
 		}
 
-		def main(args: Array[String]): Unit = {
-			// set up db
-			val mongoClient: MongoClient = MongoClient()
-			val database: MongoDatabase = mongoClient.getDatabase("irms")
-			val collection: MongoCollection[Document] = database.getCollection("universe")
+		def updates2bulkwrite(w:List[UpdateOneModel[Nothing]]) = {
+			collection.bulkWrite(w, BulkWriteOptions().ordered(false))
+		}
 
+		def main(args: Array[String]): Unit = {
 			// construct observables
 			val readyToExit = new Semaphore(0)
 			val allowedFiles = new Semaphore(max_batches_per_file)
 			val allowedBatches = new Semaphore(max_queries)
-			val streamFiles = Observable.from( 30 to 9658 ).flatMap(
+			//45 to 9658
+			val streamFiles = Observable.from( args(0).toInt to args(1).toInt ).flatMap(
 				j => Observable.from(Future {
 					allowedFiles.acquire(max_batches_per_file)
 					println("file: "+j)
@@ -88,7 +93,7 @@ package irms {
 				)
 			})
 			val streamUpdates = streamBatches.map(lines2updates)
-			val streamBulkWrite = streamUpdates.flatMap(w=>collection.bulkWrite(w, BulkWriteOptions().ordered(false)))
+			val streamBulkWrite = streamUpdates.flatMap(updates2bulkwrite)
 			streamBulkWrite.subscribe(
 				// onNext
 				j => allowedBatches.release() ,
