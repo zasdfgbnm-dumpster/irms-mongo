@@ -23,8 +23,8 @@ package irms {
 		val elements = pt.split(" ")
 		val tol = 1e-5
 
-		val max_queries:Int = 100
-		val batch_size:Int = 1000 // 1 batch contain 1000 elements
+		val max_queries:Int = 40
+		val batch_size:Int = 10000 // 1 batch contain 1000 elements
 		val max_batches_per_file:Int = 100 // 1 file contain 100 batches
 
 		// db commons
